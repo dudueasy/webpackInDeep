@@ -11,21 +11,18 @@ const depRelation = collectCodeAndDeps(resolve(projectRoot, 'index.js'))
 console.log(depRelation)
 console.log('done')
 
-function collectCodeAndDeps(absoluteFilePath: string){
+function collectCodeAndDeps(absoluteFilePath: string): DepRelation {
   const key = relative(projectRoot, absoluteFilePath)
   const code = readFileSync(absoluteFilePath, 'utf8');
   const ast = parse(code, {sourceType: 'module'});
 
-  const depRelation = {[key]: { deps:[], code }}
+  const depRelation: DepRelation  = {[key]: { deps:[], code }}
 
   traverse(ast,{
     enter(path) {
       if (path.node.type === 'ImportDeclaration') {
         const sourcePath = path.node.source.value
-        // 获得相对 被分析文件 的绝对路径
-        const absolutePath = resolve(projectRoot, sourcePath)
-        const relativePath = relative(projectRoot, absolutePath)
-        depRelation[key].deps.push(relativePath)
+        depRelation[key].deps.push(sourcePath)
       }
     },
   })
