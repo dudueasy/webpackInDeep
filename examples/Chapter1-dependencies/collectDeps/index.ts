@@ -3,8 +3,9 @@ import traverse from "@babel/traverse"
 import { readFileSync } from 'fs'
 import { resolve, relative } from 'path';
 
+const PROJECT_DIR_NAME = 'project_1'
 type DepRelation = {[filename: string]: { deps: string[], code: string }}
-const projectRoot = resolve(__dirname, 'project_1')
+const projectRoot = resolve(__dirname, PROJECT_DIR_NAME )
 
 const depRelation = collectCodeAndDeps(resolve(projectRoot, 'index.js'))
 
