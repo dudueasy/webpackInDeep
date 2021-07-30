@@ -16,6 +16,11 @@ console.log('done')
 
 function collectCodeAndDeps(entryPath: string): DepRelation {
   const fileName = relative(projectRoot, entryPath)
+
+  // 一旦检查到这个文件名已经收集过依赖,  就退出, 从而解决循环依赖
+  if(depRelation[fileName]){
+    return
+  }
   const code = readFileSync(entryPath, 'utf8');
   const ast = parse(code, {sourceType: 'module'});
 
