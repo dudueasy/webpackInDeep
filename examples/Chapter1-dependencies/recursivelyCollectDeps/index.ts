@@ -24,22 +24,14 @@ function collectCodeAndDeps(entryPath: string): DepRelation {
   traverse(ast,{
     enter(path) {
       if (path.node.type === 'ImportDeclaration') {
+        // 依赖相对当前文件的位置
         const importedFilePath = path.node.source.value
+        // 依赖的绝对位置
         const absoluteImportFilePath = resolve(dirname(entryPath), importedFilePath)
-
-        console.log(`absoluteImportFilePath from above`);
-        console.log(absoluteImportFilePath);
-
+        // 依赖相对于projectRoot 的位置
         const relativeImportFilePath = relative(projectRoot, absoluteImportFilePath)
-        console.log(` projectRoot from above`);
-        console.log( projectRoot);
 
-        console.log(`relativeImportFilePath  from above`);
-        console.log(relativeImportFilePath);
-
-        console.info(`sourcePath from above`);
         depRelation[fileName].deps.push(relativeImportFilePath)
-
         collectCodeAndDeps(absoluteImportFilePath);
       }
     },
@@ -47,8 +39,3 @@ function collectCodeAndDeps(entryPath: string): DepRelation {
 
   return depRelation
 }
-
-
-
-
-
