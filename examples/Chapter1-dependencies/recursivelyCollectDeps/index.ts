@@ -1,38 +1,47 @@
-import { parse } from "@babel/parser"
+import {parse} from "@babel/parser"
 import traverse from "@babel/traverse"
-import { readFileSync } from 'fs'
-import { resolve, relative, dirname } from 'path';
+import {readFileSync} from 'fs'
+import {resolve, relative, dirname} from 'path';
 
 const PROJECT_DIR_NAME = 'project_2'
-type DepRelation = {[filename: string]: { deps: string[], code: string }}
-const projectRoot = resolve(__dirname, PROJECT_DIR_NAME )
+const ENTRY_FILE = 'index.js';
 
-const depRelation = {}
-collectCodeAndDeps(resolve(projectRoot, 'index.js'))
+type DepRelation = { [filename: string]: { deps: string[], code: string } }
 
-console.log(depRelation)
-console.log('done')
+const projectRoot = resolve(__dirname, PROJECT_DIR_NAME)
+const entryPath = resolve(projectRoot, ENTRY_FILE);
 
+const depRelation: DepRelation = {};
+collectCodeAndDeps(entryPath);
 
-function collectCodeAndDeps(entryPath: string): DepRelation {
-  const fileName = relative(projectRoot, entryPath)
+console.log(depRelation);
+console.log('done');
+
+function collectCodeAndDeps(filePath: string): DepRelation {
+  const fileName = relative(projectRoot, filePath)
 
   // 一旦检查到这个文件名已经收集过依赖,  就退出, 从而解决循环依赖
-  if(depRelation[fileName]){
+  if (depRelation[fileName]) {
     return
   }
-  const code = readFileSync(entryPath, 'utf8');
+  const code = readFileSync(filePath, 'utf8');
   const ast = parse(code, {sourceType: 'module'});
 
-  depRelation[fileName] = { deps:[], code }
+  // init depRelation[fileName]
+  depRelation[fileName] = {deps: [], code}
+  console.log(`ast`, ast)
 
-  traverse(ast,{
+  traverse(ast, {
     enter(path) {
+
+
       if (path.node.type === 'ImportDeclaration') {
         // 依赖相对当前文件的位置
         const importedFilePath = path.node.source.value
         // 依赖的绝对位置
-        const absoluteImportFilePath = resolve(dirname(entryPath), importedFilePath)
+        const absoluteImportFilePath = resolve(dirname(filePath), importedFilePath)
+        console.log(`importedFilePath `, importedFilePath)
+        console.log(`absoluteImportFilePath `, absoluteImportFilePath)
         // 依赖相对于projectRoot 的位置
         const relativeImportFilePath = relative(projectRoot, absoluteImportFilePath)
 
