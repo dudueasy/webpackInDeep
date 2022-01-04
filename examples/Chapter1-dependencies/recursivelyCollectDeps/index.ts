@@ -1,5 +1,6 @@
 import {parse} from "@babel/parser"
 import traverse from "@babel/traverse"
+import {transform} from "@babel/core";
 import {readFileSync} from 'fs'
 import {resolve, relative, dirname} from 'path';
 
@@ -25,11 +26,13 @@ function collectCodeAndDeps(filePath: string): DepRelation {
     return
   }
   const code = readFileSync(filePath, 'utf8');
+  const {code: es5Code} = transform(code, {presets: ['@babel/preset-env']})
+  console.log(`es5Code `, es5Code);
+
   const ast = parse(code, {sourceType: 'module'});
 
   // init depRelation[fileName]
-  depRelation[fileName] = {deps: [], code}
-  console.log(`ast`, ast)
+  depRelation[fileName] = {deps: [], code: es5Code}
 
   traverse(ast, {
     enter(path) {
