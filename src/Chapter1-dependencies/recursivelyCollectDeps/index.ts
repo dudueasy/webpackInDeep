@@ -4,7 +4,7 @@ import {transform} from "@babel/core";
 import {readFileSync} from 'fs'
 import {resolve, relative, dirname} from 'path';
 
-const PROJECT_DIR_NAME = 'project_2'
+const PROJECT_DIR_NAME = 'project'
 const ENTRY_FILE = 'index.js';
 
 type DepRelation = { [filename: string]: { deps: string[], code: string } }

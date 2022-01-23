@@ -3,7 +3,7 @@ import traverse from "@babel/traverse"
 import { readFileSync } from 'fs'
 import { resolve, relative } from 'path';
 
-const PROJECT_DIR_NAME = 'project_1'
+const PROJECT_DIR_NAME = 'project'
 type DepRelation = {[filename: string]: { deps: string[], code: string }}
 
 const projectRoot = resolve(__dirname, PROJECT_DIR_NAME )
