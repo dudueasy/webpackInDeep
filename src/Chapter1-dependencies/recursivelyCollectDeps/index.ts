@@ -19,7 +19,7 @@ console.log(depRelation);
 console.log('done');
 
 function collectCodeAndDeps(filePath: string): DepRelation {
-  const fileName = relative(projectRoot, filePath)
+  const fileName = getProjectPath(filePath)
 
   // 一旦检查到这个文件名已经收集过依赖,  就退出, 从而解决循环依赖
   if (depRelation[fileName]) {
@@ -46,7 +46,7 @@ function collectCodeAndDeps(filePath: string): DepRelation {
         console.log(`importedFilePath `, importedFilePath)
         console.log(`absoluteImportFilePath `, absoluteImportFilePath)
         // 依赖相对于projectRoot 的位置
-        const relativeImportFilePath = relative(projectRoot, absoluteImportFilePath)
+        const relativeImportFilePath = getProjectPath(absoluteImportFilePath)
 
         depRelation[fileName].deps.push(relativeImportFilePath)
         collectCodeAndDeps(absoluteImportFilePath);
@@ -55,4 +55,9 @@ function collectCodeAndDeps(filePath: string): DepRelation {
   })
 
   return depRelation
+}
+
+// 获取文件相对于根目录的相对路径
+function getProjectPath(path: string) {
+  return relative(projectRoot, path).replace(/\\/g, '/')
 }
