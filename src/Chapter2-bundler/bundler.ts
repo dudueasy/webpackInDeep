@@ -1,7 +1,7 @@
 import {parse} from "@babel/parser"
 import traverse from "@babel/traverse"
 import {transform} from "@babel/core";
-import {readFileSync, writeFileSync} from 'fs'
+import {readFileSync, writeFileSync, existsSync, mkdirSync} from 'fs'
 import {resolve, relative, dirname} from 'path';
 
 type DepRelation = { key: string, deps: string[], code: string };
@@ -9,14 +9,27 @@ type DepRelation = { key: string, deps: string[], code: string };
 // init path
 const PROJECT_DIR_NAME = 'project'
 const ENTRY_FILE = 'index.js';
-const BUNDLE_NAME = 'bundle.js'
+
+const BUNDLE_DIR =  resolve(__dirname, 'dist');
+const BUNDLE_NAME = 'bundle.js';
+const BUNDLE_PATH = resolve(BUNDLE_DIR, BUNDLE_NAME);
+
 const projectRoot = resolve(__dirname, PROJECT_DIR_NAME);
 const entryPath = resolve(projectRoot, ENTRY_FILE);
 
 // collect deps
 const depRelation: DepRelation[] = [];
 collectCodeAndDeps(entryPath);
-writeFileSync(BUNDLE_NAME, generateCode())
+
+createBundleDir();
+writeFileSync(BUNDLE_PATH, generateCode())
+
+// 创建 bundle 目录
+function createBundleDir(){
+  if(!existsSync(BUNDLE_DIR)){
+    mkdirSync(BUNDLE_DIR, {recursive: true})
+  }
+}
 
 /** function definitions */
 function generateCode() {
@@ -25,10 +38,10 @@ function generateCode() {
     depRelation.map((item) => {
       const {key, deps, code} = item
       return `{ 
-            key: ${JSON.stringify(item.key)},
-            deps: ${JSON.stringify(item.deps)},
+            key: ${JSON.stringify(key)},
+            deps: ${JSON.stringify(deps)},
             code: function(require, module, exports){
-               ${item.code}
+               ${code}
             }
          }`
     }).join(",\n") + "\n];"
