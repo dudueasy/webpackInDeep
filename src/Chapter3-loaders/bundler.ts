@@ -94,17 +94,7 @@ function collectCodeAndDeps(filePath: string): DepRelation {
       /** 细节: 这里的 rawCode 文本等同于 普通 js 文件 readyFileSync 得到的字符串
        /* 因此代码中的字符串内容需要双层引号, 因为是 "字符串中的字符串"
        */
-      code  = ` 
-        const str = ${JSON.stringify(rawCode)} 
-      
-        if(document){
-          const style = document.createElement('style'); 
-          style.innerHTML = str;
-          document.head.appendChild(style)
-        }
-        
-        export default str
-    `
+      code = require('../loaders/css-loader')(rawCode);
   }
 
   // step1: transform code
