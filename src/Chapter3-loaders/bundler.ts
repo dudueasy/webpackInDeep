@@ -87,11 +87,14 @@ function collectCodeAndDeps(filePath: string): DepRelation {
   }
 
   let rawCode = readFileSync(filePath, 'utf8');
+  let code = rawCode;
 
   // 检查是否是 css 文件, 如果是 css , 那么动态创建 style 标签
   if(/.*\.css$/.test(filePath)){
-      // 细节:  代码中的字符串内容需要双层引号, 因为是 "字符串中的字符串"
-      rawCode = ` 
+      /** 细节: 这里的 rawCode 文本等同于 普通 js 文件 readyFileSync 得到的字符串
+       /* 因此代码中的字符串内容需要双层引号, 因为是 "字符串中的字符串"
+       */
+      code  = ` 
         const str = ${JSON.stringify(rawCode)} 
       
         if(document){
@@ -105,7 +108,7 @@ function collectCodeAndDeps(filePath: string): DepRelation {
   }
 
   // step1: transform code
-  const {code: es5Code} = transform(rawCode, {presets: ['@babel/preset-env']});
+  const {code: es5Code} = transform(code, {presets: ['@babel/preset-env']});
 
   // step2: init depRelation[key]
   const item = {key, deps: [], code: es5Code}
@@ -113,7 +116,7 @@ function collectCodeAndDeps(filePath: string): DepRelation {
   depRelation.push(item)
 
   // step3: 将代码转换为 AST 并收集当前文件的依赖
-  const ast = parse(rawCode, {sourceType: 'module'});
+  const ast = parse(code, {sourceType: 'module'});
   traverse(ast, {
     enter(path) {
       if (path.node.type === 'ImportDeclaration') {
