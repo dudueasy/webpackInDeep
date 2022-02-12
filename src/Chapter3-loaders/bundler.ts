@@ -1,7 +1,7 @@
 import {parse} from "@babel/parser"
 import traverse from "@babel/traverse"
 import {transform} from "@babel/core";
-import {readFileSync, writeFileSync, existsSync, mkdirSync, mkdir} from 'fs'
+import {readFileSync, writeFileSync, existsSync, mkdirSync} from 'fs'
 import {resolve, relative, dirname} from 'path';
 
 type DepRelation = { key: string, deps: string[], code: string };
@@ -87,14 +87,14 @@ function collectCodeAndDeps(filePath: string): DepRelation {
   }
 
   let rawCode = readFileSync(filePath, 'utf8');
-  let code = rawCode;
+  let code = rawCode
 
   // 检查是否是 css 文件, 如果是 css , 那么动态创建 style 标签
   if(/.*\.css$/.test(filePath)){
-      /** 细节: 这里的 rawCode 文本等同于 普通 js 文件 readyFileSync 得到的字符串
-       /* 因此代码中的字符串内容需要双层引号, 因为是 "字符串中的字符串"
-       */
-      code = require('../loaders/css-loader')(rawCode);
+      let tempName = 'temp'
+      rawCode = require('./loaders/css-loader')(rawCode, tempName);
+      rawCode = require('./loaders/style-loader.js')(rawCode, tempName);
+      code = rawCode
   }
 
   // step1: transform code
